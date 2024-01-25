@@ -2,6 +2,7 @@ from transformers import pipeline
 
 classifier = pipeline("sentiment-analysis")
 
-result = classifier(["I am very happy!", "I am not sad!"])
+results = classifier(["I am very happy!", "I am sad!"])
 
-print(result)
+for result in results:
+    print(result)
