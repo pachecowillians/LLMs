@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+import evaluate
 from pathlib import Path
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
@@ -62,11 +64,19 @@ training_args = TrainingArguments(
 
 model = DistilBertForSequenceClassification.from_pretrained(model_name)
 
+metric = evaluate.load("accuracy")
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
+    compute_metrics=compute_metrics
 )
 
 trainer.train()
