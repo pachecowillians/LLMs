@@ -1,3 +1,4 @@
 transformers==4.37.1
 torch==2.1.2
 torchvision==0.16.2
+scikit-learn
