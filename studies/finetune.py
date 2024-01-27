@@ -52,31 +52,37 @@ test_dataset = IMDBDataset(test_encodings, test_labels)
 
 training_args = TrainingArguments(
     output_dir="./results",
-    num_train_epochs=2,
+    num_train_epochs=1,
     per_device_train_batch_size=16,
-    per_device_eval_batch_size=64, 
-    warmup_steps=500,
-    learning_rate=5e-5,
+    per_device_eval_batch_size=32, 
+    # gradient_accumulation_steps=4,
+    warmup_steps=200,
+    learning_rate=1e-5,
     weight_decay=0.01,
-    logging_dir="./logs",
-    logging_steps=10,
+    # logging_dir="./logs",
+    # logging_steps=10,
+    # evaluation_strategy="epoch",
 )
 
 model = DistilBertForSequenceClassification.from_pretrained(model_name)
 
-metric = evaluate.load("accuracy")
+# device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
+# model.to(device)
+
+# metric = evaluate.load("accuracy")
+
+# def compute_metrics(eval_pred):
+#     logits, labels = eval_pred
+#     predictions = np.argmax(logits, axis=-1)
+#     return metric.compute(predictions=predictions, references=labels)
 
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
-    compute_metrics=compute_metrics
+    # compute_metrics=compute_metrics
 )
 
 trainer.train()
