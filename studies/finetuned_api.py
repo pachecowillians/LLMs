@@ -5,8 +5,8 @@ import torch
 app = Flask(__name__)
 
 # Load the fine-tuned model and tokenizer
-model = DistilBertForSequenceClassification.from_pretrained("./fine-tuned-classification-model")
-tokenizer = DistilBertTokenizer.from_pretrained("./fine-tuned-classification-model")
+model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
 
 # Define the classification endpoint
 @app.route('/classify', methods=['POST'])
@@ -21,16 +21,19 @@ def classify_text():
     with torch.no_grad():
         outputs = model(**inputs)
 
+    # Get predicted class
+    predicted_class_index = torch.argmax(outputs.logits).item()
+    
+    # Map predicted class index to label
+    predicted_label = "positive" if predicted_class_index == 1 else "negative"
+
     # Get predicted class probabilities
     probabilities = torch.nn.functional.softmax(outputs.logits, dim=1).tolist()[0]
-
-    # Get the predicted class
-    predicted_class = torch.argmax(outputs.logits).item()
 
     # Prepare the response
     response = {
         'text': text,
-        'predicted_class': predicted_class,
+        'predicted_class': predicted_label,
         'class_probabilities': probabilities
     }
 
